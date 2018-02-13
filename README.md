@@ -21,15 +21,13 @@ The messages from exceptions occurring during executions are printed to stderr w
 #### Conceptual overview of the algorithm and its time complexity
 The challenge asks for an input file to be read on a rolling basis (as if it were streamed), identify repeat donors, and print statistics (percentile, count and sum) based on donation recipient+zip code+year.  
   
+**Reading input data:**: The script processes itcont.txt one line at a time (although the file may be read in chunks). Each line is read character-by-character seeking the delimiter "|" and the fields are identified by their numeric position as defined in the FEC data dictionary, therefore allowing for considerable efficiency even in cases of severely misformed input (e.g. single lines with millions of characters). Once it has found all fields it needs, it stops parsing the line and ingests the record. Misformed individual fields are identified in ways that are specific to each field. Please see the source code at Icc.java for the details.  
+  
 **Repeat donors:** they are identified by name + ZIP code. The string "donor name=ZIP code" is hashed (HashMap in Java) and that hash provides access to the integer containing the earliest known year of a donation from that donor. If a donor makes a donation, and there is another donation already recorded in a previous year, that donor is a repeat donor.  
   
 **Recipient group:** the source code calls a "recipient group" the combination of recipient + zip code + year. This is the group of contributions to be considered for computing the percentile, count and sum. The string "recipient ID=zip code=year" is used as key in a hash map (Java HashMap). The corresponding value of the key is a PercentileQueue object, please read below.  
   
 **Percentile, count and sum:** A paramount concern for this coding challenge is computational efficiency, considering that for each record from a repeat donor it is needed to output a percentile, a count and a sum of the contributions. The class PercentileQueue performs this task with two heap data structures called "lower" and "upper". The individual contributions are balanced between the two heaps such that the root of lower is always the desired percentile. The count of contributions is simply the size of both heaps together, and the sum is kept precomputed by PercentileQueue every time it ingests a new contribution. **This allows for logarithmic time when inserting new contributions, and constant time when retrieving the percentile, count and sum.**  
-  
-  
-#### Other considerations
-The script identifies the fields in itcont.txt by their numeric position (as defined in the FEC data dictionary), and detects misformed data in ways that are specific to each field. Please see the source code at Icc.java for the details.  
   
   
 *Thank you for the opportunity!*  
